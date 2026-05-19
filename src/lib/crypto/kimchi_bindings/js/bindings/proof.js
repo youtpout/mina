@@ -1,6 +1,15 @@
 /* global kimchi_ffi, tsRustConversion 
 */
 
+function kimchiMlArrayLength(xs) {
+    return Array.isArray(xs) ? Math.max(0, xs.length - 1) : 0;
+}
+
+function kimchiLogProofCreate(field, witness_cols, caml_runtime_tables, prev_challenges, prev_sgs) {
+    console.error(
+        `[o1js proof-create] field=${field} witnessCols=${kimchiMlArrayLength(witness_cols)} runtimeTables=${kimchiMlArrayLength(caml_runtime_tables)} prevChallenges=${kimchiMlArrayLength(prev_challenges)} prevSgs=${kimchiMlArrayLength(prev_sgs)}`
+    );
+}
 
 // Provides: caml_pasta_fp_plonk_proof_create
 // Requires: kimchi_ffi, tsRustConversion
@@ -11,6 +20,13 @@ var caml_pasta_fp_plonk_proof_create = function (
     prev_challenges,
     prev_sgs
 ) {
+    kimchiLogProofCreate(
+        'fp',
+        witness_cols,
+        caml_runtime_tables,
+        prev_challenges,
+        prev_sgs
+    );
     var w = new kimchi_ffi.WasmVecVecFp(witness_cols.length - 1);
     for (var i = 1; i < witness_cols.length; i++) {
         w.push(tsRustConversion.fp.vectorToRust(witness_cols[i]));
@@ -79,6 +95,13 @@ var caml_pasta_fq_plonk_proof_create = function (
     prev_challenges,
     prev_sgs
 ) {
+    kimchiLogProofCreate(
+        'fq',
+        witness_cols,
+        caml_runtime_tables,
+        prev_challenges,
+        prev_sgs
+    );
     var w = new kimchi_ffi.WasmVecVecFq(witness_cols.length - 1);
     for (var i = 1; i < witness_cols.length; i++) {
         w.push(tsRustConversion.fq.vectorToRust(witness_cols[i]));
