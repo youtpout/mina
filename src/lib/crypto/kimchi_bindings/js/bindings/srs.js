@@ -2,6 +2,79 @@
   tsBindings, tsRustConversion, kimchi_is_native
 */
 
+function kimchiGpuMsmState() {
+    var globals = globalThis;
+    return {
+        isEnabled:
+            typeof globals.__o1js_is_gpu_proving_enabled === 'function' &&
+            globals.__o1js_is_gpu_proving_enabled(),
+        runner:
+            typeof globals.__o1js_gpu_msm_runner === 'function'
+                ? globals.__o1js_gpu_msm_runner
+                : undefined,
+    };
+}
+
+function kimchiNormalizeScalar(value) {
+    return typeof value === 'bigint' ? value : BigInt(value.toString());
+}
+
+function kimchiNormalizePoint(point) {
+    if (point === undefined || point === null) return null;
+    if (Array.isArray(point)) {
+        if (point.length >= 3 && point[0] === 0) point = point[1];
+        else if (point.length >= 2 && point[0] === 0) point = point[1];
+    }
+    if (point === undefined || point === null) return null;
+    if (point.isInfinity === true || point.infinity === true) return null;
+    if ('x' in point && 'y' in point) {
+        return {
+            x: kimchiNormalizeScalar(point.x),
+            y: kimchiNormalizeScalar(point.y),
+        };
+    }
+    return null;
+}
+
+function kimchiTryRunGpuMsm(context) {
+    var state = kimchiGpuMsmState();
+    if (!state.isEnabled || state.runner === undefined) return undefined;
+    var result = state.runner(context);
+    if (result !== null && typeof result === 'object' && typeof result.then === 'function') {
+        throw new Error(
+            'GpuMsmRunner must return synchronously when called from kimchi SRS bindings'
+        );
+    }
+    return result;
+}
+
+function kimchiCommitEvaluationsWithGpu(field, curve, t, domain_size, evals) {
+    var rust = tsRustConversion[field].vectorToRust(evals);
+    var cpuFallback = function () {
+        var res = kimchi_ffi['caml_' + field + '_srs_commit_evaluations'](t, domain_size, rust);
+        return tsRustConversion[field].polyCommFromRust(res);
+    };
+    var state = kimchiGpuMsmState();
+    if (!state.isEnabled || state.runner === undefined) return cpuFallback();
+    var mlScalars = tsRustConversion[field].vectorFromRust(rust);
+    var scalars = Array.from(mlScalars, kimchiNormalizeScalar);
+    var basis = tsSrs[field].lagrangeCommitmentsWholeDomain(t, domain_size);
+    var points = Array.from(basis, kimchiNormalizePoint);
+    var result = kimchiTryRunGpuMsm({
+        curve: curve,
+        msmKind: 'srs-commit-evaluations',
+        scalars: scalars,
+        points: points,
+        metadata: {
+            field: field,
+            domainSize: domain_size,
+            pointCount: points.length,
+        },
+        cpuFallback: cpuFallback,
+    });
+    return result === undefined ? cpuFallback() : result;
+}
+
 // Provides: tsSrs
 // Requires: tsBindings, kimchi_ffi
 var tsSrs = tsBindings.srs(kimchi_ffi);
@@ -62,12 +135,7 @@ var caml_fp_srs_maybe_lagrange_commitment = function (srs, domain_size, i) {
 // Provides: caml_fp_srs_commit_evaluations
 // Requires: kimchi_ffi, tsRustConversion
 var caml_fp_srs_commit_evaluations = function (t, domain_size, fps) {
-    var res = kimchi_ffi.caml_fp_srs_commit_evaluations(
-        t,
-        domain_size,
-        tsRustConversion.fp.vectorToRust(fps)
-    );
-    return tsRustConversion.fp.polyCommFromRust(res);
+    return kimchiCommitEvaluationsWithGpu('fp', 'vesta', t, domain_size, fps);
 };
 
 // Provides: caml_fp_srs_b_poly_commitment
@@ -166,12 +234,7 @@ var caml_fq_srs_maybe_lagrange_commitment = function (srs, domain_size, i) {
 // Provides: caml_fq_srs_commit_evaluations
 // Requires: kimchi_ffi, tsRustConversion
 var caml_fq_srs_commit_evaluations = function (t, domain_size, fqs) {
-    var res = kimchi_ffi.caml_fq_srs_commit_evaluations(
-        t,
-        domain_size,
-        tsRustConversion.fq.vectorToRust(fqs)
-    );
-    return tsRustConversion.fq.polyCommFromRust(res);
+    return kimchiCommitEvaluationsWithGpu('fq', 'pallas', t, domain_size, fqs);
 };
 
 // Provides: caml_fq_srs_b_poly_commitment
