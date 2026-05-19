@@ -3,7 +3,8 @@
 	url = https://github.com/o1-labs/snarky
 [submodule "src/lib/crypto/proof-systems"]
 	path = src/lib/crypto/proof-systems
-	url = https://github.com/o1-labs/proof-systems.git
+	url = git@github.com:youtpout/proof-systems.git
+	branch = gpu-proving
 [submodule "src/lib/crypto/kimchi_bindings/stubs/kimchi-stubs-vendors"]
 	path = src/lib/crypto/kimchi_bindings/stubs/kimchi-stubs-vendors
 	url = https://github.com/MinaProtocol/kimchi-stubs-vendors.git
