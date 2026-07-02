@@ -1,0 +1,44 @@
+name: Check build
+
+on:
+  pull_request:
+
+jobs:
+  check_build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+        ocaml-version:
+          - 4.14.2 # match mina's version
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-version }}
+          dune-cache: true
+
+      - name: Build
+        run: |
+          eval $(opam env)
+          opam update
+          opam pin add . -y --with-test
+
+      - name: Tests
+        run: |
+          eval $(opam env)
+          dune runtest
+
+      - name: Format
+        run: |
+          eval $(opam env)
+          opam install ocamlformat.0.20.1 # match mina's version
+          dune build @fmt

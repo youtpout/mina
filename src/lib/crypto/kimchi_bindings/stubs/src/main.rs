@@ -12,6 +12,7 @@ use kimchi_stubs::{
     arkworks::{bigint_256::*, group_affine::*, group_projective::*, pasta_fp::*, pasta_fq::*},
     field_vector::{fp::*, fq::*},
     gate_vector::{fp::*, fq::*},
+    snarky_constraint_system::{fp::*, fq::*},
     oracles::{fp::*, fq::*, CamlOracles},
     pasta_fp_plonk_index::*,
     pasta_fp_plonk_proof::*,
@@ -348,6 +349,43 @@ fn generate_kimchi_bindings(mut w: impl std::io::Write, env: &mut Env) {
                     decl_func!(w, env, caml_pasta_fq_plonk_gate_vector_digest => "digest");
                     decl_func!(w, env, caml_pasta_fq_plonk_circuit_serialize => "to_json");
                 });
+            });
+        });
+
+        decl_module!(w, env, "SnarkyConstraintSystem", {
+            decl_module!(w, env, "Fp", {
+                decl_type!(w, env, CamlFpSnarkyConstraintSystem => "t");
+
+                decl_func!(w, env, caml_fp_snarky_cs_create => "create");
+                decl_func!(w, env, caml_fp_snarky_cs_set_primary_input_size => "set_primary_input_size");
+                decl_func!(w, env, caml_fp_snarky_cs_get_primary_input_size => "get_primary_input_size");
+                decl_func!(w, env, caml_fp_snarky_cs_set_prev_challenges => "set_prev_challenges");
+                decl_func!(w, env, caml_fp_snarky_cs_get_rows_len => "get_rows_len");
+                decl_func!(w, env, caml_fp_snarky_cs_add_boolean => "add_boolean");
+                decl_func!(w, env, caml_fp_snarky_cs_add_equal => "add_equal");
+                decl_func!(w, env, caml_fp_snarky_cs_add_square => "add_square");
+                decl_func!(w, env, caml_fp_snarky_cs_add_r1cs => "add_r1cs");
+                decl_func!(w, env, caml_fp_snarky_cs_finalize => "finalize");
+                decl_func!(w, env, caml_fp_snarky_cs_digest => "digest");
+                decl_func!(w, env, caml_fp_snarky_cs_get_gates => "get_gates");
+                decl_func!(w, env, caml_fp_snarky_cs_compute_witness => "compute_witness");
+            });
+            decl_module!(w, env, "Fq", {
+                decl_type!(w, env, CamlFqSnarkyConstraintSystem => "t");
+
+                decl_func!(w, env, caml_fq_snarky_cs_create => "create");
+                decl_func!(w, env, caml_fq_snarky_cs_set_primary_input_size => "set_primary_input_size");
+                decl_func!(w, env, caml_fq_snarky_cs_get_primary_input_size => "get_primary_input_size");
+                decl_func!(w, env, caml_fq_snarky_cs_set_prev_challenges => "set_prev_challenges");
+                decl_func!(w, env, caml_fq_snarky_cs_get_rows_len => "get_rows_len");
+                decl_func!(w, env, caml_fq_snarky_cs_add_boolean => "add_boolean");
+                decl_func!(w, env, caml_fq_snarky_cs_add_equal => "add_equal");
+                decl_func!(w, env, caml_fq_snarky_cs_add_square => "add_square");
+                decl_func!(w, env, caml_fq_snarky_cs_add_r1cs => "add_r1cs");
+                decl_func!(w, env, caml_fq_snarky_cs_finalize => "finalize");
+                decl_func!(w, env, caml_fq_snarky_cs_digest => "digest");
+                decl_func!(w, env, caml_fq_snarky_cs_get_gates => "get_gates");
+                decl_func!(w, env, caml_fq_snarky_cs_compute_witness => "compute_witness");
             });
         });
 

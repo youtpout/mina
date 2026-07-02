@@ -1,0 +1,6 @@
+; matches warning list from src/dune in coda repo
+; dune file in app/reformat-snarky should have same list
+
+(data_only_dirs website snarky_cuda)
+
+(dirs :standard \ node_modules)

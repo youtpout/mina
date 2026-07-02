@@ -85,6 +85,118 @@ module Protocol = struct
     end
   end
 
+  module SnarkyConstraintSystem = struct
+    module Fp = struct
+      type nonrec t
+
+      external create : unit -> t = "caml_fp_snarky_cs_create"
+
+      external set_primary_input_size : t -> int -> unit
+        = "caml_fp_snarky_cs_set_primary_input_size"
+
+      external get_primary_input_size : t -> int
+        = "caml_fp_snarky_cs_get_primary_input_size"
+
+      external set_prev_challenges : t -> int -> unit
+        = "caml_fp_snarky_cs_set_prev_challenges"
+
+      external get_rows_len : t -> int = "caml_fp_snarky_cs_get_rows_len"
+
+      external add_boolean :
+           t
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> unit = "caml_fp_snarky_cs_add_boolean"
+
+      external add_equal :
+           t
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> unit = "caml_fp_snarky_cs_add_equal"
+
+      external add_square :
+           t
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> unit = "caml_fp_snarky_cs_add_square"
+
+      external add_r1cs :
+           t
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> unit = "caml_fp_snarky_cs_add_r1cs"
+
+      external finalize : t -> unit = "caml_fp_snarky_cs_finalize"
+
+      external digest : t -> bytes = "caml_fp_snarky_cs_digest"
+
+      external get_gates :
+        t -> Pasta_bindings.Fp.t Kimchi_types.circuit_gate array
+        = "caml_fp_snarky_cs_get_gates"
+
+      external compute_witness :
+           t
+        -> Pasta_bindings.Fp.t array
+        -> Pasta_bindings.Fp.t array
+        -> Pasta_bindings.Fp.t array array = "caml_fp_snarky_cs_compute_witness"
+    end
+
+    module Fq = struct
+      type nonrec t
+
+      external create : unit -> t = "caml_fq_snarky_cs_create"
+
+      external set_primary_input_size : t -> int -> unit
+        = "caml_fq_snarky_cs_set_primary_input_size"
+
+      external get_primary_input_size : t -> int
+        = "caml_fq_snarky_cs_get_primary_input_size"
+
+      external set_prev_challenges : t -> int -> unit
+        = "caml_fq_snarky_cs_set_prev_challenges"
+
+      external get_rows_len : t -> int = "caml_fq_snarky_cs_get_rows_len"
+
+      external add_boolean :
+           t
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> unit = "caml_fq_snarky_cs_add_boolean"
+
+      external add_equal :
+           t
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> unit = "caml_fq_snarky_cs_add_equal"
+
+      external add_square :
+           t
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> unit = "caml_fq_snarky_cs_add_square"
+
+      external add_r1cs :
+           t
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> unit = "caml_fq_snarky_cs_add_r1cs"
+
+      external finalize : t -> unit = "caml_fq_snarky_cs_finalize"
+
+      external digest : t -> bytes = "caml_fq_snarky_cs_digest"
+
+      external get_gates :
+        t -> Pasta_bindings.Fq.t Kimchi_types.circuit_gate array
+        = "caml_fq_snarky_cs_get_gates"
+
+      external compute_witness :
+           t
+        -> Pasta_bindings.Fq.t array
+        -> Pasta_bindings.Fq.t array
+        -> Pasta_bindings.Fq.t array array = "caml_fq_snarky_cs_compute_witness"
+    end
+  end
+
   module SRS = struct
     module Fp = struct
       type nonrec t
