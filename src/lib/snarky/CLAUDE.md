@@ -18,8 +18,11 @@ progressif des modules OCaml par des shims au-dessus du crate Rust.
 | transaction_snark + blockchain_snark | ✅ vérifié | `dune build` exit 0 |
 | Stubs `SnarkyConstraintSystem` dans kimchi-stubs | ✅ fait | proof-systems `7d77f25c4f` : `kimchi-stubs/src/snarky_constraint_system.rs` — create, add_{boolean,equal,square,r1cs}, finalize, digest, get_gates, compute_witness (Fp et Fq) ; les cvars traversent la frontière en combinaisons linéaires aplaties `(constant, [(coeff, idx)])` |
 | Externals OCaml générés | ✅ fait | `Kimchi_bindings.Protocol.SnarkyConstraintSystem.Fp/Fq` (déclarés dans `kimchi_bindings/stubs/src/main.rs`, régénérés dans `kimchi_bindings.ml`) ; pickles rebuild OK |
-| Module OCaml backend : `Snarky_backendless.Backend_intf` sur ces externals | ⬜ à faire | dans `kimchi_pasta_snarky_backend` : remplacer `plonk_constraint_system.ml` — l'OCaml aplatit ses `Cvar.t` (`to_constant_and_terms`) avant chaque appel ; les contraintes kimchi custom (Poseidon, EC…) restent à exposer |
-| Supprimer `plonk_constraint_system.ml` (~1900 l.) | ⬜ à faire | une fois le module ci-dessus branché et la parité de digest validée |
+| Module OCaml `Rust_constraint_system` | ✅ fait (contraintes de base) | `kimchi_pasta_snarky_backend/rust_constraint_system.ml` : implémente l'interface du CS sur les externals ; instancié comme `Vesta_based_plonk.Rust_R1CS_constraint_system` (et Pallas). Les contraintes kimchi custom (Poseidon, EC…) lèvent encore une exception — FFI à étendre |
+| **Parité de gates OCaml vs Rust** | ✅ validée (base) | `test/test_rust_constraint_system.ml` : même circuit gate à gate (types, wiring, coefficients, rows publiques) pour boolean/square/r1cs/equal — `dune build @src/lib/crypto/kimchi_pasta_snarky_backend/test/runtest` |
+| Étendre le FFI aux contraintes kimchi (Poseidon, EC, range check, lookups) | ⬜ à faire | les types Rust ont déjà les derives `ocaml_types` ; ajouter les `add_kimchi_constraint` dans kimchi-stubs + le dispatch dans `rust_constraint_system.ml` |
+| Basculer `Vesta/Pallas_based_plonk.R1CS_constraint_system` sur le module Rust | ⬜ à faire | après extension du FFI + parité re-validée sur un circuit pickles réel |
+| Supprimer `plonk_constraint_system.ml` (~1900 l.) | ⬜ à faire | dernière étape après la bascule |
 | Stubs `RunState` (witness côté Rust) | ⬜ optionnel | `compute_witness` est déjà exposé au niveau CS ; RunState complet utile pour amincir `checked_runner.ml` ensuite |
 | Test de parité : digests de circuits identiques OCaml vs Rust | ⬜ à faire | critique : un layout de gates différent change les verification keys (hard fork) |
 | Amincir le DSL vendoré (état déporté côté Rust) | ⬜ à faire | après la parité de digest |

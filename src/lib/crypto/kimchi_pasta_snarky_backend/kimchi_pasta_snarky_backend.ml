@@ -4,6 +4,7 @@ module Constants = Constants
 module Field = Field
 module Intf = Intf
 module Plonk_constraint_system = Plonk_constraint_system
+module Rust_constraint_system = Rust_constraint_system
 module Scale_round = Scale_round
 
 module type Snark_intf = Plonk_constraint_system.Snark_intf
@@ -46,6 +47,13 @@ module Vesta_based_plonk = struct
         let params = poseidon_params
       end)
 
+  (* The Rust-backed constraint system (snarky-rs migration). Not yet the
+     default: the kimchi custom constraints are not wired through the FFI. *)
+  module Rust_R1CS_constraint_system =
+    Rust_constraint_system.Make
+      (Field)
+      (Kimchi_bindings.Protocol.SnarkyConstraintSystem.Fp)
+
   module Constraint = R1CS_constraint_system.Constraint
 
   module Run_state = Snarky_backendless.Run_state.Make (struct
@@ -85,6 +93,13 @@ module Pallas_based_plonk = struct
       (struct
         let params = poseidon_params
       end)
+
+  (* The Rust-backed constraint system (snarky-rs migration). Not yet the
+     default: the kimchi custom constraints are not wired through the FFI. *)
+  module Rust_R1CS_constraint_system =
+    Rust_constraint_system.Make
+      (Field)
+      (Kimchi_bindings.Protocol.SnarkyConstraintSystem.Fq)
 
   module Constraint = R1CS_constraint_system.Constraint
 

@@ -1,10 +1,13 @@
 (tests
- (names test_bigint test_field)
+ (names test_bigint test_field test_rust_constraint_system)
  (libraries
   alcotest
   bin_prot.shape
   core_kernel
+  kimchi_bindings
+  kimchi_types
   kimchi_pasta_snarky_backend
+  snarky.backendless
   hex
   sexplib0)
  (preprocess
