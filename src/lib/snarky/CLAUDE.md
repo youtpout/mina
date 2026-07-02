@@ -20,7 +20,10 @@ progressif des modules OCaml par des shims au-dessus du crate Rust.
 | Externals OCaml générés | ✅ fait | `Kimchi_bindings.Protocol.SnarkyConstraintSystem.Fp/Fq` (déclarés dans `kimchi_bindings/stubs/src/main.rs`, régénérés dans `kimchi_bindings.ml`) ; pickles rebuild OK |
 | Module OCaml `Rust_constraint_system` | ✅ fait (contraintes de base) | `kimchi_pasta_snarky_backend/rust_constraint_system.ml` : implémente l'interface du CS sur les externals ; instancié comme `Vesta_based_plonk.Rust_R1CS_constraint_system` (et Pallas). Les contraintes kimchi custom (Poseidon, EC…) lèvent encore une exception — FFI à étendre |
 | **Parité de gates OCaml vs Rust** | ✅ validée (base) | `test/test_rust_constraint_system.ml` : même circuit gate à gate (types, wiring, coefficients, rows publiques) pour boolean/square/r1cs/equal — `dune build @src/lib/crypto/kimchi_pasta_snarky_backend/test/runtest` |
-| Étendre le FFI aux contraintes kimchi (Poseidon, EC, range check, lookups) | ⬜ à faire | les types Rust ont déjà les derives `ocaml_types` ; ajouter les `add_kimchi_constraint` dans kimchi-stubs + le dispatch dans `rust_constraint_system.ml` |
+| FFI contraintes kimchi : Basic, Poseidon, EC_add_complete, EC_scale, EC_endoscale, EC_endoscalar | ✅ fait | proof-systems `c3781739d6` + dispatch OCaml ; le Rust `EndoscaleRound` a été aligné sur mina (champ `inv`, colonne 2 du gate EndoMul) |
+| **Parité gates étendue : Poseidon (55 rounds) + Basic** | ✅ validée | même circuit gate à gate, round constants compris |
+| FFI restant : Lookup, RangeCheck0/1, Xor, ForeignFieldAdd/Mul, Rot64, tables | ⬜ à faire | nécessite d'abord de porter ces émetteurs de gates dans le crate Rust (le `KimchiConstraint` ressuscité ne les a pas) ; ils lèvent une exception explicite côté OCaml |
+| Parité EC (add_complete/scale/endoscale/endoscalar) à tester | ⬜ à faire | FFI câblé, test à écrire avec des rounds réalistes |
 | Basculer `Vesta/Pallas_based_plonk.R1CS_constraint_system` sur le module Rust | ⬜ à faire | après extension du FFI + parité re-validée sur un circuit pickles réel |
 | Supprimer `plonk_constraint_system.ml` (~1900 l.) | ⬜ à faire | dernière étape après la bascule |
 | Stubs `RunState` (witness côté Rust) | ⬜ optionnel | `compute_witness` est déjà exposé au niveau CS ; RunState complet utile pour amincir `checked_runner.ml` ensuite |

@@ -126,6 +126,77 @@ module Protocol = struct
         -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
         -> unit = "caml_fp_snarky_cs_add_r1cs"
 
+      external add_basic :
+           t
+        -> Pasta_bindings.Fp.t
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+        -> Pasta_bindings.Fp.t
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+        -> Pasta_bindings.Fp.t
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+        -> Pasta_bindings.Fp.t
+        -> Pasta_bindings.Fp.t
+        -> unit
+        = "caml_fp_snarky_cs_add_basic_bytecode" "caml_fp_snarky_cs_add_basic"
+
+      external add_poseidon :
+           t
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           array
+           array
+        -> unit = "caml_fp_snarky_cs_add_poseidon"
+
+      external add_ec_add_complete :
+           t
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> unit
+        = "caml_fp_snarky_cs_add_ec_add_complete_bytecode" "caml_fp_snarky_cs_add_ec_add_complete"
+
+      external add_ec_scale :
+           t
+        -> ( ( (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+             * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+             )
+             array
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+             array
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+             array
+           * ( (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+             * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+             )
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           * (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array) )
+           array
+        -> unit = "caml_fp_snarky_cs_add_ec_scale"
+
+      external add_ec_endoscale :
+           t
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           array
+           array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array
+        -> unit = "caml_fp_snarky_cs_add_ec_endoscale"
+
+      external add_ec_endoscalar :
+           t
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           array
+           array
+        -> unit = "caml_fp_snarky_cs_add_ec_endoscalar"
+
       external finalize : t -> unit = "caml_fp_snarky_cs_finalize"
 
       external digest : t -> bytes = "caml_fp_snarky_cs_digest"
@@ -180,6 +251,77 @@ module Protocol = struct
         -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
         -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
         -> unit = "caml_fq_snarky_cs_add_r1cs"
+
+      external add_basic :
+           t
+        -> Pasta_bindings.Fq.t
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+        -> Pasta_bindings.Fq.t
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+        -> Pasta_bindings.Fq.t
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+        -> Pasta_bindings.Fq.t
+        -> Pasta_bindings.Fq.t
+        -> unit
+        = "caml_fq_snarky_cs_add_basic_bytecode" "caml_fq_snarky_cs_add_basic"
+
+      external add_poseidon :
+           t
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           array
+           array
+        -> unit = "caml_fq_snarky_cs_add_poseidon"
+
+      external add_ec_add_complete :
+           t
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> unit
+        = "caml_fq_snarky_cs_add_ec_add_complete_bytecode" "caml_fq_snarky_cs_add_ec_add_complete"
+
+      external add_ec_scale :
+           t
+        -> ( ( (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+             * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+             )
+             array
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+             array
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+             array
+           * ( (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+             * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+             )
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           * (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array) )
+           array
+        -> unit = "caml_fq_snarky_cs_add_ec_scale"
+
+      external add_ec_endoscale :
+           t
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           array
+           array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array
+        -> unit = "caml_fq_snarky_cs_add_ec_endoscale"
+
+      external add_ec_endoscalar :
+           t
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           array
+           array
+        -> unit = "caml_fq_snarky_cs_add_ec_endoscalar"
 
       external finalize : t -> unit = "caml_fq_snarky_cs_finalize"
 

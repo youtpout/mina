@@ -17,8 +17,10 @@ module PC = Kimchi_pasta_snarky_backend.Plonk_constraint_system.Plonk_constraint
    - v1 * v1 = v2
    - v0 * v1 = v3
    - v2 + 2*v3 = v4 *)
+let v i : Field.t Snarky_backendless.Cvar.t =
+  Snarky_backendless.Cvar.Unsafe.of_index i
+
 let add_constraints (add : Backend.Constraint.t -> unit) =
-  let v i : Field.t Snarky_backendless.Cvar.t = Snarky_backendless.Cvar.Unsafe.of_index i in
   add (PC.Boolean (v 0)) ;
   add (PC.Square (v 1, v 2)) ;
   add (PC.R1CS (v 0, v 1, v 3)) ;
@@ -26,13 +28,35 @@ let add_constraints (add : Backend.Constraint.t -> unit) =
     (PC.Equal
        ( Snarky_backendless.Cvar.Add
            (v 2, Snarky_backendless.Cvar.Scale (Field.of_int 2, v 3))
-       , v 4 ) )
+       , v 4 ) ) ;
+  (* generic kimchi gate: 3*v1 + 4*v2 - v3 + 5*v1*v2 + 7 = 0 *)
+  add
+    (PC.Basic
+       { l = (Field.of_int 3, v 1)
+       ; r = (Field.of_int 4, v 2)
+       ; o = (Field.of_int (-1), v 3)
+       ; m = Field.of_int 5
+       ; c = Field.of_int 7
+       } ) ;
+  (* a full poseidon permutation: 55 rounds + final state, SPONGE_WIDTH 3;
+     the wiring uses fresh variables per intermediary state *)
+  let rounds = 55 in
+  let first_var = 5 in
+  let state =
+    Array.init (rounds + 1) ~f:(fun round ->
+        Array.init 3 ~f:(fun i -> v (first_var + (round * 3) + i)) )
+  in
+  add (PC.Poseidon { state })
+
+let num_aux =
+  (* v1..v4 + poseidon intermediary states *)
+  4 + (56 * 3)
 
 let build_ocaml () =
   let cs = Ocaml_cs.create () in
   Ocaml_cs.set_primary_input_size cs 1 ;
   add_constraints (Ocaml_cs.add_constraint cs) ;
-  Ocaml_cs.set_auxiliary_input_size cs 4 ;
+  Ocaml_cs.set_auxiliary_input_size cs num_aux ;
   Ocaml_cs.finalize cs ;
   cs
 
@@ -40,7 +64,7 @@ let build_rust () =
   let cs = Rust_cs.create () in
   Rust_cs.set_primary_input_size cs 1 ;
   add_constraints (Rust_cs.add_constraint cs) ;
-  Rust_cs.set_auxiliary_input_size cs 4 ;
+  Rust_cs.set_auxiliary_input_size cs num_aux ;
   Rust_cs.finalize cs ;
   cs
 

@@ -365,6 +365,12 @@ fn generate_kimchi_bindings(mut w: impl std::io::Write, env: &mut Env) {
                 decl_func!(w, env, caml_fp_snarky_cs_add_equal => "add_equal");
                 decl_func!(w, env, caml_fp_snarky_cs_add_square => "add_square");
                 decl_func!(w, env, caml_fp_snarky_cs_add_r1cs => "add_r1cs");
+                decl_func!(w, env, caml_fp_snarky_cs_add_basic => "add_basic");
+                decl_func!(w, env, caml_fp_snarky_cs_add_poseidon => "add_poseidon");
+                decl_func!(w, env, caml_fp_snarky_cs_add_ec_add_complete => "add_ec_add_complete");
+                decl_func!(w, env, caml_fp_snarky_cs_add_ec_scale => "add_ec_scale");
+                decl_func!(w, env, caml_fp_snarky_cs_add_ec_endoscale => "add_ec_endoscale");
+                decl_func!(w, env, caml_fp_snarky_cs_add_ec_endoscalar => "add_ec_endoscalar");
                 decl_func!(w, env, caml_fp_snarky_cs_finalize => "finalize");
                 decl_func!(w, env, caml_fp_snarky_cs_digest => "digest");
                 decl_func!(w, env, caml_fp_snarky_cs_get_gates => "get_gates");
@@ -382,6 +388,12 @@ fn generate_kimchi_bindings(mut w: impl std::io::Write, env: &mut Env) {
                 decl_func!(w, env, caml_fq_snarky_cs_add_equal => "add_equal");
                 decl_func!(w, env, caml_fq_snarky_cs_add_square => "add_square");
                 decl_func!(w, env, caml_fq_snarky_cs_add_r1cs => "add_r1cs");
+                decl_func!(w, env, caml_fq_snarky_cs_add_basic => "add_basic");
+                decl_func!(w, env, caml_fq_snarky_cs_add_poseidon => "add_poseidon");
+                decl_func!(w, env, caml_fq_snarky_cs_add_ec_add_complete => "add_ec_add_complete");
+                decl_func!(w, env, caml_fq_snarky_cs_add_ec_scale => "add_ec_scale");
+                decl_func!(w, env, caml_fq_snarky_cs_add_ec_endoscale => "add_ec_endoscale");
+                decl_func!(w, env, caml_fq_snarky_cs_add_ec_endoscalar => "add_ec_endoscalar");
                 decl_func!(w, env, caml_fq_snarky_cs_finalize => "finalize");
                 decl_func!(w, env, caml_fq_snarky_cs_digest => "digest");
                 decl_func!(w, env, caml_fq_snarky_cs_get_gates => "get_gates");

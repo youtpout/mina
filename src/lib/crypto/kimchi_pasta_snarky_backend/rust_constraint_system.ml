@@ -56,6 +56,54 @@ module type Ffi = sig
     -> field option * (field * int) array
     -> unit
 
+  val add_basic :
+       t
+    -> field * (field option * (field * int) array)
+    -> field * (field option * (field * int) array)
+    -> field * (field option * (field * int) array)
+    -> field
+    -> field
+    -> unit
+
+  val add_poseidon : t -> (field option * (field * int) array) array array -> unit
+
+  val add_ec_add_complete :
+       t
+    -> (field option * (field * int) array) * (field option * (field * int) array)
+    -> (field option * (field * int) array) * (field option * (field * int) array)
+    -> (field option * (field * int) array) * (field option * (field * int) array)
+    -> field option * (field * int) array
+    -> field option * (field * int) array
+    -> field option * (field * int) array
+    -> field option * (field * int) array
+    -> field option * (field * int) array
+    -> unit
+
+  val add_ec_scale :
+       t
+    -> ( ( (field option * (field * int) array)
+         * (field option * (field * int) array) )
+         array
+       * (field option * (field * int) array) array
+       * (field option * (field * int) array) array
+       * ( (field option * (field * int) array)
+         * (field option * (field * int) array) )
+       * (field option * (field * int) array)
+       * (field option * (field * int) array) )
+       array
+    -> unit
+
+  val add_ec_endoscale :
+       t
+    -> (field option * (field * int) array) array array
+    -> field option * (field * int) array
+    -> field option * (field * int) array
+    -> field option * (field * int) array
+    -> unit
+
+  val add_ec_endoscalar :
+    t -> (field option * (field * int) array) array array -> unit
+
   val finalize : t -> unit
 
   val digest : t -> bytes
@@ -125,6 +173,7 @@ struct
     (constant, Array.of_list terms)
 
   let add_constraint (t : t) (c : constraint_) =
+    let pair (x, y) = (flatten x, flatten y) in
     match c with
     | Plonk_constraint_system.Plonk_constraint.Boolean v ->
         Ffi.add_boolean t.cs (flatten v)
@@ -134,10 +183,79 @@ struct
         Ffi.add_square t.cs (flatten a) (flatten b)
     | Plonk_constraint_system.Plonk_constraint.R1CS (a, b, c) ->
         Ffi.add_r1cs t.cs (flatten a) (flatten b) (flatten c)
+    | Plonk_constraint_system.Plonk_constraint.Basic
+        { l = cl, vl; r = cr, vr; o = co, vo; m; c } ->
+        Ffi.add_basic t.cs (cl, flatten vl) (cr, flatten vr) (co, flatten vo)
+          m c
+    | Plonk_constraint_system.Plonk_constraint.Poseidon { state } ->
+        Ffi.add_poseidon t.cs (Array.map state ~f:(Array.map ~f:flatten))
+    | Plonk_constraint_system.Plonk_constraint.EC_add_complete
+        { p1; p2; p3; inf; same_x; slope; inf_z; x21_inv } ->
+        Ffi.add_ec_add_complete t.cs (pair p1) (pair p2) (pair p3)
+          (flatten inf) (flatten same_x) (flatten slope) (flatten inf_z)
+          (flatten x21_inv)
+    | Plonk_constraint_system.Plonk_constraint.EC_scale { state } ->
+        let round (r : _ Scale_round.t) =
+          ( Array.map r.accs ~f:pair
+          , Array.map r.bits ~f:flatten
+          , Array.map r.ss ~f:flatten
+          , pair r.base
+          , flatten r.n_prev
+          , flatten r.n_next )
+        in
+        Ffi.add_ec_scale t.cs (Array.map state ~f:round)
+    | Plonk_constraint_system.Plonk_constraint.EC_endoscale
+        { state; xs; ys; n_acc } ->
+        (* fixed order expected by the FFI:
+           [xt; yt; xp; yp; n_acc; xr; yr; s1; s3; b1; b2; b3; b4; inv] *)
+        let round (r : _ Endoscale_round.t) =
+          Array.map ~f:flatten
+            [| r.xt
+             ; r.yt
+             ; r.xp
+             ; r.yp
+             ; r.n_acc
+             ; r.xr
+             ; r.yr
+             ; r.s1
+             ; r.s3
+             ; r.b1
+             ; r.b2
+             ; r.b3
+             ; r.b4
+             ; r.inv
+            |]
+        in
+        Ffi.add_ec_endoscale t.cs
+          (Array.map state ~f:round)
+          (flatten xs) (flatten ys) (flatten n_acc)
+    | Plonk_constraint_system.Plonk_constraint.EC_endoscalar { state } ->
+        (* fixed order expected by the FFI:
+           [n0; n8; a0; b0; a8; b8; x0; x1; x2; x3; x4; x5; x6; x7] *)
+        let round (r : _ Endoscale_scalar_round.t) =
+          Array.map ~f:flatten
+            [| r.n0
+             ; r.n8
+             ; r.a0
+             ; r.b0
+             ; r.a8
+             ; r.b8
+             ; r.x0
+             ; r.x1
+             ; r.x2
+             ; r.x3
+             ; r.x4
+             ; r.x5
+             ; r.x6
+             ; r.x7
+            |]
+        in
+        Ffi.add_ec_endoscalar t.cs (Array.map state ~f:round)
     | _ ->
         failwithf
           "Rust_constraint_system.add_constraint: kimchi constraint not yet \
-           exposed through the FFI: %s"
+           exposed through the FFI (lookup / range check / xor / foreign \
+           field / rot): %s"
           (Sexp.to_string (Constraint.sexp_of_t c))
           ()
 
