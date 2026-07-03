@@ -18,7 +18,7 @@ progressif des modules OCaml par des shims au-dessus du crate Rust.
 | transaction_snark + blockchain_snark | ✅ vérifié | `dune build` exit 0 |
 | Stubs `SnarkyConstraintSystem` dans kimchi-stubs | ✅ fait | proof-systems `7d77f25c4f` : `kimchi-stubs/src/snarky_constraint_system.rs` — create, add_{boolean,equal,square,r1cs}, finalize, digest, get_gates, compute_witness (Fp et Fq) ; les cvars traversent la frontière en combinaisons linéaires aplaties `(constant, [(coeff, idx)])` |
 | Externals OCaml générés | ✅ fait | `Kimchi_bindings.Protocol.SnarkyConstraintSystem.Fp/Fq` (déclarés dans `kimchi_bindings/stubs/src/main.rs`, régénérés dans `kimchi_bindings.ml`) ; pickles rebuild OK |
-| Module OCaml `Rust_constraint_system` | ✅ fait (contraintes de base) | `kimchi_pasta_snarky_backend/rust_constraint_system.ml` : implémente l'interface du CS sur les externals ; instancié comme `Vesta_based_plonk.Rust_R1CS_constraint_system` (et Pallas). Les contraintes kimchi custom (Poseidon, EC…) lèvent encore une exception — FFI à étendre |
+| Module OCaml `Rust_constraint_system` | ✅ fait | `kimchi_pasta_snarky_backend/rust_constraint_system.ml` : implémente l'interface du CS sur les externals ; instancié comme `Vesta_based_plonk.Rust_R1CS_constraint_system` (et Pallas) |
 | **Parité de gates OCaml vs Rust** | ✅ validée (base) | `test/test_rust_constraint_system.ml` : même circuit gate à gate (types, wiring, coefficients, rows publiques) pour boolean/square/r1cs/equal — `dune build @src/lib/crypto/kimchi_pasta_snarky_backend/test/runtest` |
 | FFI contraintes kimchi : Basic, Poseidon, EC_add_complete, EC_scale, EC_endoscale, EC_endoscalar | ✅ fait | proof-systems `c3781739d6` + dispatch OCaml ; le Rust `EndoscaleRound` a été aligné sur mina (champ `inv`, colonne 2 du gate EndoMul) |
 | **Parité gates étendue : Poseidon (55 rounds) + Basic** | ✅ validée | même circuit gate à gate, round constants compris |
@@ -26,8 +26,9 @@ progressif des modules OCaml par des shims au-dessus du crate Rust.
 | FFI générique `add_row(gate_type, vars, coeffs)` | ✅ fait | proof-systems `e26d7607c4` — permet d'émettre n'importe quel gate mono-row depuis l'OCaml sans stub dédié |
 | Dispatch OCaml Xor/Rot64/ForeignFieldAdd/Mul via `add_row` | ✅ fait | layouts recopiés de `plonk_constraint_system.ml` |
 | **Parité totale : 16/17 variantes validées gate à gate** | ✅ validée | base + Basic + Poseidon + 4×EC + RangeCheck0/1 + Lookup + Xor + Rot64 + FFA + FFM — seul manque AddFixedLookupTable/AddRuntimeTableCfg (état de tables côté Rust à porter) |
-| Parité EC (add_complete/scale/endoscale/endoscalar) à tester | ⬜ à faire | FFI câblé, test à écrire avec des rounds réalistes |
-| Basculer `Vesta/Pallas_based_plonk.R1CS_constraint_system` sur le module Rust | ⬜ à faire | après extension du FFI + parité re-validée sur un circuit pickles réel |
+| Bascule à blanc (essai) | ✅ instructif | shadowing de `R1CS_constraint_system` par le module Rust → l'erreur de compilation pointe le prochain couplage : `Tick.Keypair.create` (kimchi_backend) consomme le type concret `Plonk_constraint_system.t` pour créer l'index prover |
+| FFI `to_gate_vector` : passer les gates Rust→Rust | ⬜ à faire | ajouter `caml_fp_snarky_cs_to_gate_vector(cs) -> Gates.Vector.Fp.t` dans kimchi-stubs (retourne le `CamlPastaFpPlonkGateVector` directement, sans copie OCaml) + brancher `Keypair.create` dessus ; idem lookup tables dans `finalize_and_get_gates` |
+| Basculer `Vesta/Pallas_based_plonk.R1CS_constraint_system` sur le module Rust | ⬜ à faire | après `to_gate_vector` + tables de lookup ; re-valider la parité sur un circuit pickles réel |
 | Supprimer `plonk_constraint_system.ml` (~1900 l.) | ⬜ à faire | dernière étape après la bascule |
 | Stubs `RunState` (witness côté Rust) | ⬜ optionnel | `compute_witness` est déjà exposé au niveau CS ; RunState complet utile pour amincir `checked_runner.ml` ensuite |
 | Test de parité : digests de circuits identiques OCaml vs Rust | ⬜ à faire | critique : un layout de gates différent change les verification keys (hard fork) |
