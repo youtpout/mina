@@ -347,7 +347,7 @@ let test_gates () =
   let ocaml_cs = build_ocaml () in
   let rust_cs = build_rust () in
   let ocaml_gates, _, _ = Ocaml_cs.finalize_and_get_gates ocaml_cs in
-  let rust_gates = Rust_cs.finalize_and_get_gates rust_cs in
+  let rust_gates = Rust_cs.get_gates rust_cs in
   let module V = Kimchi_bindings.Protocol.Gates.Vector.Fp in
   (* both gate vectors include the public-input rows *)
   let n_ocaml = V.len ocaml_gates in

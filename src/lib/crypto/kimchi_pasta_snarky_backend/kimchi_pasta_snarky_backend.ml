@@ -52,6 +52,7 @@ module Vesta_based_plonk = struct
   module Rust_R1CS_constraint_system =
     Rust_constraint_system.Make
       (Field)
+      (Kimchi_bindings.Protocol.Gates.Vector.Fp)
       (Kimchi_bindings.Protocol.SnarkyConstraintSystem.Fp)
 
   module Constraint = R1CS_constraint_system.Constraint
@@ -99,6 +100,7 @@ module Pallas_based_plonk = struct
   module Rust_R1CS_constraint_system =
     Rust_constraint_system.Make
       (Field)
+      (Kimchi_bindings.Protocol.Gates.Vector.Fq)
       (Kimchi_bindings.Protocol.SnarkyConstraintSystem.Fq)
 
   module Constraint = R1CS_constraint_system.Constraint

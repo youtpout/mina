@@ -227,6 +227,9 @@ module Protocol = struct
         -> Pasta_bindings.Fp.t array
         -> unit = "caml_fp_snarky_cs_add_row"
 
+      external to_gate_vector : t -> Gates.Vector.Fp.t
+        = "caml_fp_snarky_cs_to_gate_vector"
+
       external finalize : t -> unit = "caml_fp_snarky_cs_finalize"
 
       external digest : t -> bytes = "caml_fp_snarky_cs_digest"
@@ -382,6 +385,9 @@ module Protocol = struct
            array
         -> Pasta_bindings.Fq.t array
         -> unit = "caml_fq_snarky_cs_add_row"
+
+      external to_gate_vector : t -> Gates.Vector.Fq.t
+        = "caml_fq_snarky_cs_to_gate_vector"
 
       external finalize : t -> unit = "caml_fq_snarky_cs_finalize"
 

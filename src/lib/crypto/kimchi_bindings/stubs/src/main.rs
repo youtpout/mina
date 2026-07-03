@@ -40,6 +40,8 @@ use kimchi_stubs::{
     CurrOrNext,
     GateType,
 };
+#[allow(clippy::wildcard_imports)]
+use kimchi_stubs::snarky_constraint_system::*;
 use ocaml_gen::{decl_fake_generic, decl_func, decl_module, decl_type, decl_type_alias, Env};
 use std::fs::File;
 use std::io::Write;
@@ -375,6 +377,7 @@ fn generate_kimchi_bindings(mut w: impl std::io::Write, env: &mut Env) {
                 decl_func!(w, env, caml_fp_snarky_cs_add_range_check1 => "add_range_check1");
                 decl_func!(w, env, caml_fp_snarky_cs_add_lookup => "add_lookup");
                 decl_func!(w, env, caml_fp_snarky_cs_add_row => "add_row");
+                decl_func!(w, env, caml_fp_snarky_cs_to_gate_vector => "to_gate_vector");
                 decl_func!(w, env, caml_fp_snarky_cs_finalize => "finalize");
                 decl_func!(w, env, caml_fp_snarky_cs_digest => "digest");
                 decl_func!(w, env, caml_fp_snarky_cs_get_gates => "get_gates");
@@ -402,6 +405,7 @@ fn generate_kimchi_bindings(mut w: impl std::io::Write, env: &mut Env) {
                 decl_func!(w, env, caml_fq_snarky_cs_add_range_check1 => "add_range_check1");
                 decl_func!(w, env, caml_fq_snarky_cs_add_lookup => "add_lookup");
                 decl_func!(w, env, caml_fq_snarky_cs_add_row => "add_row");
+                decl_func!(w, env, caml_fq_snarky_cs_to_gate_vector => "to_gate_vector");
                 decl_func!(w, env, caml_fq_snarky_cs_finalize => "finalize");
                 decl_func!(w, env, caml_fq_snarky_cs_digest => "digest");
                 decl_func!(w, env, caml_fq_snarky_cs_get_gates => "get_gates");

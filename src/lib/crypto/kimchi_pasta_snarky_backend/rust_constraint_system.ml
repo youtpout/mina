@@ -23,6 +23,8 @@ open Core_kernel
 module type Ffi = sig
   type field
 
+  type gates
+
   type t
 
   val create : unit -> t
@@ -117,6 +119,8 @@ module type Ffi = sig
     -> field array
     -> unit
 
+  val to_gate_vector : t -> gates
+
   val finalize : t -> unit
 
   val digest : t -> bytes
@@ -128,7 +132,10 @@ end
 
 module Make
     (Fp : Backend_field.S)
-    (Ffi : Ffi with type field := Fp.t) =
+    (Gates : sig
+      type t
+    end)
+    (Ffi : Ffi with type field := Fp.t and type gates := Gates.t) =
 struct
   (* the same constraint type as the OCaml backend, so that this module is a
      drop-in replacement *)
@@ -472,9 +479,18 @@ struct
 
   let finalize (t : t) = Ffi.finalize t.cs
 
-  let finalize_and_get_gates (t : t) =
+  (** The gates as OCaml values (used by the parity tests). *)
+  let get_gates (t : t) =
     Ffi.finalize t.cs ;
     Ffi.get_gates t.cs
+
+  (** The gates as a native (Rust-side) gate vector, handed directly to the
+      index-creation path. Lookup tables are not supported yet. *)
+  let finalize_and_get_gates (t : t) :
+      Gates.t
+      * Fp.t Kimchi_types.lookup_table array
+      * Fp.t Kimchi_types.runtime_table_cfg array =
+    (Ffi.to_gate_vector t.cs, [||], [||])
 
   (** Note: this is the (md5 of the) Rust-side digest of the gates; it is a
       circuit identity, but it is NOT equal to the digest computed by the

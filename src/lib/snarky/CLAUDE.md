@@ -27,7 +27,7 @@ progressif des modules OCaml par des shims au-dessus du crate Rust.
 | Dispatch OCaml Xor/Rot64/ForeignFieldAdd/Mul via `add_row` | ✅ fait | layouts recopiés de `plonk_constraint_system.ml` |
 | **Parité totale : 16/17 variantes validées gate à gate** | ✅ validée | base + Basic + Poseidon + 4×EC + RangeCheck0/1 + Lookup + Xor + Rot64 + FFA + FFM — seul manque AddFixedLookupTable/AddRuntimeTableCfg (état de tables côté Rust à porter) |
 | Bascule à blanc (essai) | ✅ instructif | shadowing de `R1CS_constraint_system` par le module Rust → l'erreur de compilation pointe le prochain couplage : `Tick.Keypair.create` (kimchi_backend) consomme le type concret `Plonk_constraint_system.t` pour créer l'index prover |
-| FFI `to_gate_vector` : passer les gates Rust→Rust | ⬜ à faire | ajouter `caml_fp_snarky_cs_to_gate_vector(cs) -> Gates.Vector.Fp.t` dans kimchi-stubs (retourne le `CamlPastaFpPlonkGateVector` directement, sans copie OCaml) + brancher `Keypair.create` dessus ; idem lookup tables dans `finalize_and_get_gates` |
+| FFI `to_gate_vector` : gates Rust→Rust | ✅ fait | proof-systems `2aecbfd819` ; `Rust_constraint_system.finalize_and_get_gates` retourne désormais `(Gates.t natif, tables vides, cfgs vides)` — la forme exacte attendue par le functor `dlog_plonk_based_keypair` |
 | Basculer `Vesta/Pallas_based_plonk.R1CS_constraint_system` sur le module Rust | ⬜ à faire | après `to_gate_vector` + tables de lookup ; re-valider la parité sur un circuit pickles réel |
 | Supprimer `plonk_constraint_system.ml` (~1900 l.) | ⬜ à faire | dernière étape après la bascule |
 | Stubs `RunState` (witness côté Rust) | ⬜ optionnel | `compute_witness` est déjà exposé au niveau CS ; RunState complet utile pour amincir `checked_runner.ml` ensuite |
