@@ -218,6 +218,15 @@ module Protocol = struct
            array
         -> unit = "caml_fp_snarky_cs_add_lookup"
 
+      external add_row :
+           t
+        -> Kimchi_types.gate_type
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           option
+           array
+        -> Pasta_bindings.Fp.t array
+        -> unit = "caml_fp_snarky_cs_add_row"
+
       external finalize : t -> unit = "caml_fp_snarky_cs_finalize"
 
       external digest : t -> bytes = "caml_fp_snarky_cs_digest"
@@ -364,6 +373,15 @@ module Protocol = struct
         -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
            array
         -> unit = "caml_fq_snarky_cs_add_lookup"
+
+      external add_row :
+           t
+        -> Kimchi_types.gate_type
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           option
+           array
+        -> Pasta_bindings.Fq.t array
+        -> unit = "caml_fq_snarky_cs_add_row"
 
       external finalize : t -> unit = "caml_fq_snarky_cs_finalize"
 
