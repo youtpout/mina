@@ -24,7 +24,8 @@ progressif des modules OCaml par des shims au-dessus du crate Rust.
 | **Parité gates étendue : Poseidon (55 rounds) + Basic** | ✅ validée | même circuit gate à gate, round constants compris |
 | FFI RangeCheck0/1 + Lookup | ✅ fait | émetteurs portés dans le crate Rust (proof-systems `ad66738cb4`) + dispatch OCaml |
 | FFI générique `add_row(gate_type, vars, coeffs)` | ✅ fait | proof-systems `e26d7607c4` — permet d'émettre n'importe quel gate mono-row depuis l'OCaml sans stub dédié |
-| Dispatch OCaml Xor/Rot64/ForeignFieldAdd/Mul via `add_row` | ⬜ à faire | mécanique : recopier les layouts de `plonk_constraint_system.ml` (une `Ffi.add_row cs gate vars coeffs` par variante) ; tables de lookup (AddFixedLookupTable/RuntimeTableCfg) demandent encore un vrai portage côté Rust |
+| Dispatch OCaml Xor/Rot64/ForeignFieldAdd/Mul via `add_row` | ✅ fait | layouts recopiés de `plonk_constraint_system.ml` |
+| **Parité totale : 16/17 variantes validées gate à gate** | ✅ validée | base + Basic + Poseidon + 4×EC + RangeCheck0/1 + Lookup + Xor + Rot64 + FFA + FFM — seul manque AddFixedLookupTable/AddRuntimeTableCfg (état de tables côté Rust à porter) |
 | Parité EC (add_complete/scale/endoscale/endoscalar) à tester | ⬜ à faire | FFI câblé, test à écrire avec des rounds réalistes |
 | Basculer `Vesta/Pallas_based_plonk.R1CS_constraint_system` sur le module Rust | ⬜ à faire | après extension du FFI + parité re-validée sur un circuit pickles réel |
 | Supprimer `plonk_constraint_system.ml` (~1900 l.) | ⬜ à faire | dernière étape après la bascule |

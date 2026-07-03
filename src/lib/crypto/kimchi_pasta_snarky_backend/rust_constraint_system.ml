@@ -8,10 +8,10 @@
     combinations [(constant, [(coefficient, var_index); ...])] before
     crossing the FFI boundary.
 
-    Current scope: the basic snarky constraints (boolean, equal, square,
-    r1cs). The kimchi custom constraints (Poseidon, EC gates, range checks,
-    lookups) are implemented in Rust but their FFI is not wired yet — see
-    src/lib/snarky/CLAUDE.md for the migration status. *)
+    Current scope: all constraint variants except the lookup-table
+    configurations (AddFixedLookupTable / AddRuntimeTableCfg), which still
+    need a real port on the Rust side — see src/lib/snarky/CLAUDE.md for
+    the migration status. *)
 
 (* alias before [open Core_kernel], which has its own [Field] module *)
 module Backend_field = Field
@@ -109,6 +109,13 @@ module type Ffi = sig
   val add_range_check1 : t -> (field option * (field * int) array) array -> (field option * (field * int) array) array -> unit
 
   val add_lookup : t -> (field option * (field * int) array) array -> unit
+
+  val add_row :
+       t
+    -> Kimchi_types.gate_type
+    -> (field option * (field * int) array) option array
+    -> field array
+    -> unit
 
   val finalize : t -> unit
 
@@ -326,6 +333,133 @@ struct
         { w0; w1; w2; w3; w4; w5; w6 } ->
         Ffi.add_lookup t.cs
           (Array.map ~f:flatten [| w0; w1; w2; w3; w4; w5; w6 |])
+    | Plonk_constraint_system.Plonk_constraint.Xor
+        { in1
+        ; in2
+        ; out
+        ; in1_0
+        ; in1_1
+        ; in1_2
+        ; in1_3
+        ; in2_0
+        ; in2_1
+        ; in2_2
+        ; in2_3
+        ; out_0
+        ; out_1
+        ; out_2
+        ; out_3
+        } ->
+        let s x = Some (flatten x) in
+        Ffi.add_row t.cs Kimchi_types.Xor16
+          [| s in1; s in2; s out; s in1_0; s in1_1; s in1_2; s in1_3; s in2_0
+           ; s in2_1; s in2_2; s in2_3; s out_0; s out_1; s out_2; s out_3
+          |]
+          [||]
+    | Plonk_constraint_system.Plonk_constraint.Rot64
+        { word
+        ; rotated
+        ; excess
+        ; bound_limb0
+        ; bound_limb1
+        ; bound_limb2
+        ; bound_limb3
+        ; bound_crumb0
+        ; bound_crumb1
+        ; bound_crumb2
+        ; bound_crumb3
+        ; bound_crumb4
+        ; bound_crumb5
+        ; bound_crumb6
+        ; bound_crumb7
+        ; two_to_rot
+        } ->
+        let s x = Some (flatten x) in
+        Ffi.add_row t.cs Kimchi_types.Rot64
+          [| s word; s rotated; s excess; s bound_limb0; s bound_limb1
+           ; s bound_limb2; s bound_limb3; s bound_crumb0; s bound_crumb1
+           ; s bound_crumb2; s bound_crumb3; s bound_crumb4; s bound_crumb5
+           ; s bound_crumb6; s bound_crumb7
+          |]
+          [| two_to_rot |]
+    | Plonk_constraint_system.Plonk_constraint.ForeignFieldAdd
+        { left_input_lo
+        ; left_input_mi
+        ; left_input_hi
+        ; right_input_lo
+        ; right_input_mi
+        ; right_input_hi
+        ; field_overflow
+        ; carry
+        ; foreign_field_modulus0
+        ; foreign_field_modulus1
+        ; foreign_field_modulus2
+        ; sign
+        } ->
+        let s x = Some (flatten x) in
+        Ffi.add_row t.cs Kimchi_types.ForeignFieldAdd
+          [| s left_input_lo; s left_input_mi; s left_input_hi
+           ; s right_input_lo; s right_input_mi; s right_input_hi
+           ; s field_overflow; s carry; None; None; None; None; None; None
+           ; None
+          |]
+          [| foreign_field_modulus0
+           ; foreign_field_modulus1
+           ; foreign_field_modulus2
+           ; sign
+          |]
+    | Plonk_constraint_system.Plonk_constraint.ForeignFieldMul
+        { left_input0
+        ; left_input1
+        ; left_input2
+        ; right_input0
+        ; right_input1
+        ; right_input2
+        ; remainder01
+        ; remainder2
+        ; quotient0
+        ; quotient1
+        ; quotient2
+        ; quotient_hi_bound
+        ; product1_lo
+        ; product1_hi_0
+        ; product1_hi_1
+        ; carry0
+        ; carry1_0
+        ; carry1_12
+        ; carry1_24
+        ; carry1_36
+        ; carry1_48
+        ; carry1_60
+        ; carry1_72
+        ; carry1_84
+        ; carry1_86
+        ; carry1_88
+        ; carry1_90
+        ; foreign_field_modulus2
+        ; neg_foreign_field_modulus0
+        ; neg_foreign_field_modulus1
+        ; neg_foreign_field_modulus2
+        } ->
+        let s x = Some (flatten x) in
+        Ffi.add_row t.cs Kimchi_types.ForeignFieldMul
+          [| s left_input0; s left_input1; s left_input2; s right_input0
+           ; s right_input1; s right_input2; s product1_lo; s carry1_0
+           ; s carry1_12; s carry1_24; s carry1_36; s carry1_84; s carry1_86
+           ; s carry1_88; s carry1_90
+          |]
+          [| foreign_field_modulus2
+           ; neg_foreign_field_modulus0
+           ; neg_foreign_field_modulus1
+           ; neg_foreign_field_modulus2
+          |] ;
+        Ffi.add_row t.cs Kimchi_types.Zero
+          [| s remainder01; s remainder2; s quotient0; s quotient1
+           ; s quotient2; s quotient_hi_bound; s product1_hi_0
+           ; s product1_hi_1; s carry1_48; s carry1_60; s carry1_72; s carry0
+           ; None; None; None
+          |]
+          [||]
     | _ ->
         failwithf
           "Rust_constraint_system.add_constraint: kimchi constraint not yet \

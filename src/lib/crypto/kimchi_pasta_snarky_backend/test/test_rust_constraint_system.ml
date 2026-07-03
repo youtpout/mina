@@ -46,11 +46,247 @@ let add_constraints (add : Backend.Constraint.t -> unit) =
     Array.init (rounds + 1) ~f:(fun round ->
         Array.init 3 ~f:(fun i -> v (first_var + (round * 3) + i)) )
   in
-  add (PC.Poseidon { state })
+  add (PC.Poseidon { state }) ;
+  (* fresh variable supply for the remaining constraint kinds *)
+  let next = ref (first_var + (56 * 3)) in
+  let fresh () =
+    let x = v !next in
+    incr next ; x
+  in
+  let fresh_n n = Array.init n ~f:(fun _ -> fresh ()) in
+  let fresh_pair () = (fresh (), fresh ()) in
+  (* EC complete addition *)
+  add
+    (PC.EC_add_complete
+       { p1 = fresh_pair ()
+       ; p2 = fresh_pair ()
+       ; p3 = fresh_pair ()
+       ; inf = fresh ()
+       ; same_x = fresh ()
+       ; slope = fresh ()
+       ; inf_z = fresh ()
+       ; x21_inv = fresh ()
+       } ) ;
+  (* variable-base scalar multiplication, one round *)
+  add
+    (PC.EC_scale
+       { state =
+           [| { Kimchi_pasta_snarky_backend.Scale_round.accs =
+                  Array.init 6 ~f:(fun _ -> fresh_pair ())
+              ; bits = fresh_n 5
+              ; ss = fresh_n 5
+              ; base = fresh_pair ()
+              ; n_prev = fresh ()
+              ; n_next = fresh ()
+              }
+           |]
+       } ) ;
+  (* endoscaling, one round *)
+  add
+    (PC.EC_endoscale
+       { state =
+           [| { Kimchi_pasta_snarky_backend.Endoscale_round.xt = fresh ()
+              ; yt = fresh ()
+              ; xp = fresh ()
+              ; yp = fresh ()
+              ; n_acc = fresh ()
+              ; xr = fresh ()
+              ; yr = fresh ()
+              ; s1 = fresh ()
+              ; s3 = fresh ()
+              ; b1 = fresh ()
+              ; b2 = fresh ()
+              ; b3 = fresh ()
+              ; b4 = fresh ()
+              ; inv = fresh ()
+              }
+           |]
+       ; xs = fresh ()
+       ; ys = fresh ()
+       ; n_acc = fresh ()
+       } ) ;
+  (* endoscalar, one round *)
+  add
+    (PC.EC_endoscalar
+       { state =
+           [| { Kimchi_pasta_snarky_backend.Endoscale_scalar_round.n0 =
+                  fresh ()
+              ; n8 = fresh ()
+              ; a0 = fresh ()
+              ; b0 = fresh ()
+              ; a8 = fresh ()
+              ; b8 = fresh ()
+              ; x0 = fresh ()
+              ; x1 = fresh ()
+              ; x2 = fresh ()
+              ; x3 = fresh ()
+              ; x4 = fresh ()
+              ; x5 = fresh ()
+              ; x6 = fresh ()
+              ; x7 = fresh ()
+              }
+           |]
+       } ) ;
+  (* range checks *)
+  (let f = fresh in
+   add
+     (PC.RangeCheck0
+        { v0 = f ()
+        ; v0p0 = f ()
+        ; v0p1 = f ()
+        ; v0p2 = f ()
+        ; v0p3 = f ()
+        ; v0p4 = f ()
+        ; v0p5 = f ()
+        ; v0c0 = f ()
+        ; v0c1 = f ()
+        ; v0c2 = f ()
+        ; v0c3 = f ()
+        ; v0c4 = f ()
+        ; v0c5 = f ()
+        ; v0c6 = f ()
+        ; v0c7 = f ()
+        ; compact = Field.zero
+        } ) ;
+   add
+     (PC.RangeCheck1
+        { v2 = f ()
+        ; v12 = f ()
+        ; v2c0 = f ()
+        ; v2p0 = f ()
+        ; v2p1 = f ()
+        ; v2p2 = f ()
+        ; v2p3 = f ()
+        ; v2c1 = f ()
+        ; v2c2 = f ()
+        ; v2c3 = f ()
+        ; v2c4 = f ()
+        ; v2c5 = f ()
+        ; v2c6 = f ()
+        ; v2c7 = f ()
+        ; v2c8 = f ()
+        ; v2c9 = f ()
+        ; v2c10 = f ()
+        ; v2c11 = f ()
+        ; v0p0 = f ()
+        ; v0p1 = f ()
+        ; v1p0 = f ()
+        ; v1p1 = f ()
+        ; v2c12 = f ()
+        ; v2c13 = f ()
+        ; v2c14 = f ()
+        ; v2c15 = f ()
+        ; v2c16 = f ()
+        ; v2c17 = f ()
+        ; v2c18 = f ()
+        ; v2c19 = f ()
+        } ) ;
+   (* lookup *)
+   add
+     (PC.Lookup
+        { w0 = f ()
+        ; w1 = f ()
+        ; w2 = f ()
+        ; w3 = f ()
+        ; w4 = f ()
+        ; w5 = f ()
+        ; w6 = f ()
+        } ) ;
+   (* xor *)
+   add
+     (PC.Xor
+        { in1 = f ()
+        ; in2 = f ()
+        ; out = f ()
+        ; in1_0 = f ()
+        ; in1_1 = f ()
+        ; in1_2 = f ()
+        ; in1_3 = f ()
+        ; in2_0 = f ()
+        ; in2_1 = f ()
+        ; in2_2 = f ()
+        ; in2_3 = f ()
+        ; out_0 = f ()
+        ; out_1 = f ()
+        ; out_2 = f ()
+        ; out_3 = f ()
+        } ) ;
+   (* rotation *)
+   add
+     (PC.Rot64
+        { word = f ()
+        ; rotated = f ()
+        ; excess = f ()
+        ; bound_limb0 = f ()
+        ; bound_limb1 = f ()
+        ; bound_limb2 = f ()
+        ; bound_limb3 = f ()
+        ; bound_crumb0 = f ()
+        ; bound_crumb1 = f ()
+        ; bound_crumb2 = f ()
+        ; bound_crumb3 = f ()
+        ; bound_crumb4 = f ()
+        ; bound_crumb5 = f ()
+        ; bound_crumb6 = f ()
+        ; bound_crumb7 = f ()
+        ; two_to_rot = Field.of_int 256
+        } ) ;
+   (* foreign field addition *)
+   add
+     (PC.ForeignFieldAdd
+        { left_input_lo = f ()
+        ; left_input_mi = f ()
+        ; left_input_hi = f ()
+        ; right_input_lo = f ()
+        ; right_input_mi = f ()
+        ; right_input_hi = f ()
+        ; field_overflow = f ()
+        ; carry = f ()
+        ; foreign_field_modulus0 = Field.of_int 11
+        ; foreign_field_modulus1 = Field.of_int 12
+        ; foreign_field_modulus2 = Field.of_int 13
+        ; sign = Field.one
+        } ) ;
+   (* foreign field multiplication *)
+   add
+     (PC.ForeignFieldMul
+        { left_input0 = f ()
+        ; left_input1 = f ()
+        ; left_input2 = f ()
+        ; right_input0 = f ()
+        ; right_input1 = f ()
+        ; right_input2 = f ()
+        ; remainder01 = f ()
+        ; remainder2 = f ()
+        ; quotient0 = f ()
+        ; quotient1 = f ()
+        ; quotient2 = f ()
+        ; quotient_hi_bound = f ()
+        ; product1_lo = f ()
+        ; product1_hi_0 = f ()
+        ; product1_hi_1 = f ()
+        ; carry0 = f ()
+        ; carry1_0 = f ()
+        ; carry1_12 = f ()
+        ; carry1_24 = f ()
+        ; carry1_36 = f ()
+        ; carry1_48 = f ()
+        ; carry1_60 = f ()
+        ; carry1_72 = f ()
+        ; carry1_84 = f ()
+        ; carry1_86 = f ()
+        ; carry1_88 = f ()
+        ; carry1_90 = f ()
+        ; foreign_field_modulus2 = Field.of_int 13
+        ; neg_foreign_field_modulus0 = Field.of_int 21
+        ; neg_foreign_field_modulus1 = Field.of_int 22
+        ; neg_foreign_field_modulus2 = Field.of_int 23
+        } ) ) ;
+  ignore (!next : int)
 
 let num_aux =
-  (* v1..v4 + poseidon intermediary states *)
-  4 + (56 * 3)
+  (* v1..v4 + poseidon states + all the fresh variables of the other kinds *)
+  4 + (56 * 3) + 300
 
 let build_ocaml () =
   let cs = Ocaml_cs.create () in
