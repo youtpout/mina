@@ -104,6 +104,12 @@ module type Ffi = sig
   val add_ec_endoscalar :
     t -> (field option * (field * int) array) array array -> unit
 
+  val add_range_check0 : t -> (field option * (field * int) array) array -> field -> unit
+
+  val add_range_check1 : t -> (field option * (field * int) array) array -> (field option * (field * int) array) array -> unit
+
+  val add_lookup : t -> (field option * (field * int) array) array -> unit
+
   val finalize : t -> unit
 
   val digest : t -> bytes
@@ -251,6 +257,75 @@ struct
             |]
         in
         Ffi.add_ec_endoscalar t.cs (Array.map state ~f:round)
+    | Plonk_constraint_system.Plonk_constraint.RangeCheck0
+        { v0
+        ; v0p0
+        ; v0p1
+        ; v0p2
+        ; v0p3
+        ; v0p4
+        ; v0p5
+        ; v0c0
+        ; v0c1
+        ; v0c2
+        ; v0c3
+        ; v0c4
+        ; v0c5
+        ; v0c6
+        ; v0c7
+        ; compact
+        } ->
+        Ffi.add_range_check0 t.cs
+          (Array.map ~f:flatten
+             [| v0; v0p0; v0p1; v0p2; v0p3; v0p4; v0p5; v0c0; v0c1; v0c2
+              ; v0c3; v0c4; v0c5; v0c6; v0c7
+             |] )
+          compact
+    | Plonk_constraint_system.Plonk_constraint.RangeCheck1
+        { v2
+        ; v12
+        ; v2c0
+        ; v2p0
+        ; v2p1
+        ; v2p2
+        ; v2p3
+        ; v2c1
+        ; v2c2
+        ; v2c3
+        ; v2c4
+        ; v2c5
+        ; v2c6
+        ; v2c7
+        ; v2c8
+        ; v2c9
+        ; v2c10
+        ; v2c11
+        ; v0p0
+        ; v0p1
+        ; v1p0
+        ; v1p1
+        ; v2c12
+        ; v2c13
+        ; v2c14
+        ; v2c15
+        ; v2c16
+        ; v2c17
+        ; v2c18
+        ; v2c19
+        } ->
+        Ffi.add_range_check1 t.cs
+          (Array.map ~f:flatten
+             [| v2; v12; v2c0; v2p0; v2p1; v2p2; v2p3; v2c1; v2c2; v2c3
+              ; v2c4; v2c5; v2c6; v2c7; v2c8
+             |] )
+          (Array.map ~f:flatten
+             [| v2c9; v2c10; v2c11; v0p0; v0p1; v1p0; v1p1; v2c12; v2c13
+              ; v2c14; v2c15; v2c16; v2c17; v2c18; v2c19
+             |] )
+    | Plonk_constraint_system.Plonk_constraint.Lookup
+        { w0; w1; w2; w3; w4; w5; w6 } ->
+        Ffi.add_lookup t.cs
+          (Array.map ~f:flatten [| w0; w1; w2; w3; w4; w5; w6 |])
     | _ ->
         failwithf
           "Rust_constraint_system.add_constraint: kimchi constraint not yet \

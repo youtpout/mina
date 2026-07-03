@@ -22,7 +22,8 @@ progressif des modules OCaml par des shims au-dessus du crate Rust.
 | **Parité de gates OCaml vs Rust** | ✅ validée (base) | `test/test_rust_constraint_system.ml` : même circuit gate à gate (types, wiring, coefficients, rows publiques) pour boolean/square/r1cs/equal — `dune build @src/lib/crypto/kimchi_pasta_snarky_backend/test/runtest` |
 | FFI contraintes kimchi : Basic, Poseidon, EC_add_complete, EC_scale, EC_endoscale, EC_endoscalar | ✅ fait | proof-systems `c3781739d6` + dispatch OCaml ; le Rust `EndoscaleRound` a été aligné sur mina (champ `inv`, colonne 2 du gate EndoMul) |
 | **Parité gates étendue : Poseidon (55 rounds) + Basic** | ✅ validée | même circuit gate à gate, round constants compris |
-| FFI restant : Lookup, RangeCheck0/1, Xor, ForeignFieldAdd/Mul, Rot64, tables | ⬜ à faire | nécessite d'abord de porter ces émetteurs de gates dans le crate Rust (le `KimchiConstraint` ressuscité ne les a pas) ; ils lèvent une exception explicite côté OCaml |
+| FFI RangeCheck0/1 + Lookup | ✅ fait | émetteurs portés dans le crate Rust (proof-systems `ad66738cb4`) + dispatch OCaml |
+| FFI restant : Xor, ForeignFieldAdd/Mul, Rot64, AddFixedLookupTable/RuntimeTableCfg | ⬜ à faire | émetteurs à porter dans le crate Rust ; exception explicite côté OCaml en attendant |
 | Parité EC (add_complete/scale/endoscale/endoscalar) à tester | ⬜ à faire | FFI câblé, test à écrire avec des rounds réalistes |
 | Basculer `Vesta/Pallas_based_plonk.R1CS_constraint_system` sur le module Rust | ⬜ à faire | après extension du FFI + parité re-validée sur un circuit pickles réel |
 | Supprimer `plonk_constraint_system.ml` (~1900 l.) | ⬜ à faire | dernière étape après la bascule |

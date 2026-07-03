@@ -197,6 +197,27 @@ module Protocol = struct
            array
         -> unit = "caml_fp_snarky_cs_add_ec_endoscalar"
 
+      external add_range_check0 :
+           t
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           array
+        -> Pasta_bindings.Fp.t
+        -> unit = "caml_fp_snarky_cs_add_range_check0"
+
+      external add_range_check1 :
+           t
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           array
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           array
+        -> unit = "caml_fp_snarky_cs_add_range_check1"
+
+      external add_lookup :
+           t
+        -> (Pasta_bindings.Fp.t option * (Pasta_bindings.Fp.t * int) array)
+           array
+        -> unit = "caml_fp_snarky_cs_add_lookup"
+
       external finalize : t -> unit = "caml_fp_snarky_cs_finalize"
 
       external digest : t -> bytes = "caml_fp_snarky_cs_digest"
@@ -322,6 +343,27 @@ module Protocol = struct
            array
            array
         -> unit = "caml_fq_snarky_cs_add_ec_endoscalar"
+
+      external add_range_check0 :
+           t
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           array
+        -> Pasta_bindings.Fq.t
+        -> unit = "caml_fq_snarky_cs_add_range_check0"
+
+      external add_range_check1 :
+           t
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           array
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           array
+        -> unit = "caml_fq_snarky_cs_add_range_check1"
+
+      external add_lookup :
+           t
+        -> (Pasta_bindings.Fq.t option * (Pasta_bindings.Fq.t * int) array)
+           array
+        -> unit = "caml_fq_snarky_cs_add_lookup"
 
       external finalize : t -> unit = "caml_fq_snarky_cs_finalize"
 
